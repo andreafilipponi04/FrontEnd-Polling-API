@@ -1,53 +1,82 @@
-# POLLING APPLICATION FRONTEND
+# 🎨 Polling Application Frontend
 
 **Studente:** Andrea Filipponi  
-**Project type:** Front-end demo client  
-**Back-end API repository:** [https://github.com/andreafilipponi04/Polling-Application-API.git](https://github.com/andreafilipponi04/Polling-Application-API.git) 
+**Project type:** Frontend Client
+**Repository Frontend:** [https://github.com/andreafilipponi04/Polling-Application-Frontend](https://github.com/andreafilipponi04/Polling-Application-Frontend)  
+**Repository Backend:** [https://github.com/andreafilipponi04/Polling-Application-API](https://github.com/andreafilipponi04/Polling-Application-API)  
 
-## Descrizione
+## 📖 Descrizione
 
-Questo progetto è un front-end dimostrativo separato per la Polling Application API sviluppata con Django REST Framework.  
-Il client consuma gli endpoint esposti dal back-end per permettere il login, la registrazione, la visualizzazione dei sondaggi, il voto, la consultazione dei risultati e la lettura del profilo utente.
+Questo progetto è il client frontend per la **Polling Application**.
 
-L’obiettivo del progetto è fornire una dimostrazione pratica e immediata del funzionamento della REST API tramite un’interfaccia grafica semplice e leggera.  
-Il front-end è separato dalla repository del back-end per mantenere distinta la parte client dalla parte server.
+L'interfaccia permette di registrarsi, effettuare il login (gestendo i token JWT), scorrere i sondaggi attivi, votare in sicurezza (con blocco dei doppi voti) e visualizzare i risultati aggiornati con tanto di percentuali grafiche.
 
-## Funzionalità principali
+---
 
-- Connessione rapida all’API locale o al deployment online.
-- Login utente tramite autenticazione JWT.
-- Registrazione di un nuovo account.
-- Visualizzazione della lista dei sondaggi.
-- Ricerca, filtri e ordinamento dei sondaggi.
-- Visualizzazione del dettaglio di un sondaggio.
-- Visualizzazione dei risultati con numero voti e percentuali.
-- Invio di un voto per un sondaggio attivo.
-- Visualizzazione del profilo dell’utente autenticato.
-- Visualizzazione dei sondaggi già votati.
-- Creazione di sondaggi e aggiunta di scelte, se prevista dalla UI abilitata.
+## ✨ Funzionalità dell'Interfaccia
 
-## Collegamento con il back-end
+- **Autenticazione Completa:** Form dedicati per il Login e la Registrazione di nuovi utenti con memorizzazione del token JWT (`access_token`).
+- **Esplorazione Sondaggi:** Visualizzazione dinamica dei sondaggi disponibili tramite chiamate asincrone (`fetch`).
+- **Sistema di Voto:** Interfaccia intuitiva per esprimere la propria preferenza sui sondaggi attivi (funzione abilitata solo per gli utenti loggati).
+- **Risultati in Tempo Reale:** Calcolo e visualizzazione immediata delle percentuali di voto per ogni scelta.
+- **Logger API Integrato:** Un pannello di debug integrato in fondo alla pagina che mostra in tempo reale gli status code delle risposte HTTP e i payload JSON restituiti dal server (utile per scopi didattici ed esaminativi).
 
-Il front-end utilizza la REST API disponibile ai seguenti indirizzi:
+## 🛠 Tecnologie usate
 
-- Locale: `http://127.0.0.1:8000/`
-- Online: `https://polling-application-api.onrender.com/`
+- **HTML5:** Struttura semantica della pagina.
+- **Bootstrap 5:** Layout responsive, componenti (Tab, Card, Badge, Alert) e styling senza fogli di stile pesanti.
+- **Vanilla JavaScript (ES6+):** Gestione dello stato dell'applicazione, manipolazione del DOM ed esecuzione di richieste HTTP asincrone tramite `Fetch API` (`async/await`).
 
-Per il corretto funzionamento online, il back-end deve essere raggiungibile pubblicamente e accettare richieste cross-origin dal client.  
-Nel progetto API questo collegamento è supportato dalla configurazione CORS già presente.
+## 📁 Struttura del progetto
 
-## Avvio del progetto
+Il frontend è volutamente minimale e privo di layer di build complessi (Node.js/npm) per garantire la massima portabilità:
 
-Aprire il file HTML oppure pubblicarlo con un hosting statico (ad esempio `python -m http.server 5500`).  
-Per il test completo:
+```text
+Polling-Application-Frontend/
+├── index.html   # Struttura e layout della pagina (inclusi i componenti Bootstrap)
+├── style.css    # Personalizzazioni grafiche e layout del Logger API
+├── script.js    # Logica dell'applicazione, gestione stato e chiamate fetch a Django
+└── README.md    # Questo file di istruzioni
+```
 
-1. Avviare o rendere disponibile il back-end API.
-2. Aprire il front-end.
-3. Impostare come base URL l’indirizzo locale oppure quello deployato.
-4. Eseguire login o registrazione.
-5. Testare lista sondaggi, dettaglio, voto e profilo.
+---
 
-## Note
+## 🚀 Utilizzo in Locale
 
-Questo progetto è pensato come client demo separato e non sostituisce la documentazione tecnica del back-end.  
-La logica applicativa, i permessi, le validazioni e la persistenza dei dati restano interamente gestiti dalla REST API.
+### 1. Clonare la repository
+```bash
+git clone [https://github.com/andreafilipponi04/Polling-Application-Frontend.git](https://github.com/andreafilipponi04/Polling-Application-Frontend.git)
+cd Polling-Application-Frontend
+```
+
+### 2. Avviare l'applicazione
+È sufficiente fare doppio clic sul file `index.html` per aprirlo direttamente in qualsiasi browser moderno (Chrome, Edge, Firefox, Safari).
+
+---
+
+## 🔌 Configurazione ed Endpoint API
+
+All'interno del file `script.js` (o tramite il selettore eventualmente presente nell'interfaccia), lo stato di base punta all'URL del backend:
+
+*   **In Locale:** `http://127.0.0.1:8000/api`
+*   **In Produzione (Render):** `https://polling-application-api.onrender.com/api`
+
+### Endpoint consumati dal Frontend:
+*   🔑 Login: `POST /token/`
+*   👤 Registrazione: `POST /users/` (o `/register/` a seconda della configurazione)
+*   📊 Lista Sondaggi: `GET /polls/`
+*   🗳️ Invio Voto: `POST /votes/`
+*   📈 Risultati: `GET /polls/<id>/results/`
+
+---
+
+## ⚠️ Nota importante sul CORS (Cross-Origin Resource Sharing)
+
+Quando esegui questo frontend localmente (`file://` o tramite un'estensione come *Live Server* `http://127.0.0.1:5500`), il browser bloccherà le richieste verso il backend Django almeno che quest'ultimo non sia configurato per accettarle.
+
+Se riscontri problemi di connessione o errori nella console del browser:
+1. Assicurati che nel backend Django sia installato `django-cors-headers`.
+2. Verifica che nel file `settings.py` del tuo server Django sia presente l'abilitazione per l'origine del frontend:
+```python
+   CORS_ALLOW_ALL_ORIGINS = True  # Per lo sviluppo locale
+   ```
