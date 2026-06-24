@@ -22,12 +22,6 @@ L'interfaccia permette di registrarsi, effettuare il login (gestendo i token JWT
 - **Risultati in Tempo Reale:** Calcolo e visualizzazione immediata delle percentuali di voto per ogni scelta.
 - **Logger API Integrato:** Un pannello di debug integrato in fondo alla pagina che mostra in tempo reale gli status code delle risposte HTTP e i payload JSON restituiti dal server (utile per scopi didattici ed esaminativi).
 
-## 🛠 Tecnologie usate
-
-- **HTML5:** Struttura semantica della pagina.
-- **Bootstrap 5:** Layout responsive, componenti (Tab, Card, Badge, Alert) e styling senza fogli di stile pesanti.
-- **Vanilla JavaScript (ES6+):** Gestione dello stato dell'applicazione, manipolazione del DOM ed esecuzione di richieste HTTP asincrone tramite `Fetch API` (`async/await`).
-
 ## 📁 Struttura del progetto
 
 Il frontend è volutamente minimale e privo di layer di build complessi (Node.js/npm) per garantire la massima portabilità:
