@@ -39,7 +39,7 @@ Nel progetto API questo collegamento è supportato dalla configurazione CORS gi�
 
 ## Avvio del progetto
 
-Se il front-end è statico, è sufficiente aprire il file HTML oppure pubblicarlo con un hosting statico.  
+Aprire il file HTML oppure pubblicarlo con un hosting statico (ad esempio `python -m http.server 5500`).  
 Per il test completo:
 
 1. Avviare o rendere disponibile il back-end API.
