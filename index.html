@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polling API DevSuite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container py-4" style="max-width: 1100px;">
+    <header class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center mb-4 pb-3 border-bottom border-secondary-subtle gap-3">
+        <div>
+            <h1 class="h2 mb-0">🛠️ Polling API DevSuite</h1>
+        </div>
+
+        <div class="d-flex flex-column align-items-start align-items-lg-end gap-2">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Base URL selector">
+                <button class="btn btn-outline-dark" id="btn-local">Usa locale</button>
+                <button class="btn btn-outline-primary" id="btn-remote">Usa deploy</button>
+            </div>
+            <div class="small text-muted">
+                Base URL corrente:
+                <span id="api-base-label" class="fw-bold"></span>
+            </div>
+            <div id="user-badge" class="text-end hidden">
+                <span class="badge bg-dark badge-role me-1" id="badge-username">User</span>
+                <span class="badge bg-primary badge-role" id="badge-role">Role</span>
+                <button class="btn btn-sm btn-outline-danger ms-2" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+   
+
+    <ul class="nav nav-tabs mb-4" id="mainTab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="browse-tab" data-bs-toggle="tab" data-bs-target="#browse-pane" type="button">🔍 Esplora & Filtra</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="manage-tab" data-bs-toggle="tab" data-bs-target="#manage-pane" type="button">🏗️ Crea & Gestisci</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="auth-tab" data-bs-toggle="tab" data-bs-target="#auth-pane" type="button">🔐 Autenticazione</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="mainTabContent">
+
+        <div class="tab-pane fade show active" id="browse-pane" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-dark text-white fw-bold">Filtri, ricerca e viste rapide</div>
+                        <div class="card-body">
+                            <form id="filter-form">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Ricerca globale (search)</label>
+                                    <input type="text" id="filter-search" class="form-control form-control-sm" placeholder="Parola chiave...">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Filtra per domanda</label>
+                                    <input type="text" id="filter-question" class="form-control form-control-sm" placeholder="Contiene...">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Creatore (username)</label>
+                                    <input type="text" id="filter-creator" class="form-control form-control-sm" placeholder="Es. admin">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Stato sondaggio</label>
+                                    <select id="filter-active" class="form-select form-select-sm">
+                                        <option value="">Tutti</option>
+                                        <option value="true">Solo attivi</option>
+                                        <option value="false">Solo inattivi</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Ordinamento</label>
+                                    <select id="filter-ordering" class="form-select form-select-sm">
+                                        <option value="">Nessuno</option>
+                                        <option value="-created_at">Più recenti d'inserimento</option>
+                                        <option value="created_at">Più vecchi d'inserimento</option>
+                                        <option value="-updated_at">Ultimi modificati</option>
+                                        <option value="updated_at">Primi modificati</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-dark btn-sm">Applica filtri</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetFilters()">Resetta</button>
+                                </div>
+
+                                <hr>
+
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadPolls(buildPollsUrl({ page_size: 20 }))">Mostra 20 sondaggi</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="loadMyPolls()">I miei sondaggi</button>
+                                    <button type="button" class="btn btn-outline-info btn-sm" onclick="loadVotedPolls()">Sondaggi votati</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div id="polls-list-wrapper">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">Risultati (<span id="total-count">0</span>)</h4>
+                            <div class="btn-group btn-group-sm">
+                                <button id="btn-prev" class="btn btn-outline-dark" disabled>⬅️ Prec</button>
+                                <button id="btn-next" class="btn btn-outline-dark" disabled>Succ ➡️</button>
+                            </div>
+                        </div>
+                        <div id="polls-list" class="list-group shadow-sm"></div>
+                    </div>
+
+                    <div id="poll-detail-wrapper" class="card shadow-sm border-0 hidden">
+                        <div class="card-body">
+                            <button class="btn btn-link btn-sm p-0 mb-3 text-decoration-none" onclick="backToList()">← Torna alla lista</button>
+                            <h3 id="detail-question" class="text-primary mb-2"></h3>
+                            <div class="small text-muted mb-3" id="detail-meta"></div>
+
+                            <div id="detail-choices-area" class="my-4"></div>
+                            <button id="btn-submit-vote" class="btn btn-success w-100 hidden">Invia voto autenticato</button>
+                            <div id="vote-feedback" class="mt-2 text-center fw-bold"></div>
+
+                            <hr class="my-4">
+                            <h5>📊 Risultati in tempo reale</h5>
+                            <div id="detail-results-area" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="manage-pane" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-primary text-white fw-bold">🆕 Crea un nuovo sondaggio</div>
+                        <div class="card-body">
+                            <form id="create-poll-form">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Testo della domanda</label>
+                                    <textarea id="poll-text-input" class="form-control" rows="3" placeholder="Qual è il tuo framework preferito?" required></textarea>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="poll-active-input" checked>
+                                    <label class="form-check-label fw-bold" for="poll-active-input">Rendi immediatamente attivo</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Pubblica sondaggio</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-success text-white fw-bold">🔧 Aggiungi scelte / gestisci</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">1. Seleziona ID del sondaggio target</label>
+                                <input type="number" id="manage-poll-id" class="form-control" placeholder="Inserisci l'ID numerico del sondaggio">
+                            </div>
+
+                            <div class="border p-3 rounded bg-light mb-3">
+                                <h6 class="fw-bold text-success">➕ Aggiungi una scelta</h6>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" id="choice-text-input" class="form-control" placeholder="Es. Django REST Framework">
+                                    <button class="btn btn-success" type="button" onclick="addChoiceToPoll()">Aggiungi</button>
+                                </div>
+                            </div>
+
+                            <div class="border p-3 rounded bg-light">
+                                <h6 class="fw-bold text-danger">⚠️ Azioni sul sondaggio</h6>
+                                <p class="text-muted small">Solo autore del sondaggio o admin possono modificare/eliminare.</p>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button class="btn btn-sm btn-warning flex-grow-1" onclick="togglePollStatus(true)">Imposta ATTIVO</button>
+                                    <button class="btn btn-sm btn-secondary flex-grow-1" onclick="togglePollStatus(false)">Imposta INATTIVO</button>
+                                    <button class="btn btn-sm btn-danger flex-grow-1" onclick="deletePoll()">Elimina</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="auth-pane" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-dark text-white fw-bold">🔓 Login utente (JWT)</div>
+                        <div class="card-body">
+                            <form id="auth-login-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" id="login-user" class="form-control" required autocomplete="username">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" id="login-pass" class="form-control" required autocomplete="current-password">
+                                </div>
+                                <button type="submit" class="btn btn-dark w-100">Invia e autentica</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-info text-white fw-bold">👤 Registra nuovo account</div>
+                        <div class="card-body">
+                            <form id="auth-register-form">
+                                <div class="mb-2">
+                                    <label class="form-label small">Username</label>
+                                    <input type="text" id="reg-user" class="form-control form-control-sm" required autocomplete="username">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small">Password</label>
+                                    <input type="password" id="reg-pass" class="form-control form-control-sm" required autocomplete="new-password">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small">Conferma password</label>
+                                    <input type="password" id="reg-pass2" class="form-control form-control-sm" required autocomplete="new-password">
+                                </div>
+                                <button type="submit" class="btn btn-info text-white w-100 btn-sm mt-2">Registra utente</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-5">
+        <h5 class="d-flex justify-content-between align-items-center text-secondary">
+            <span>📡 Logger risposte API</span>
+            <button class="btn btn-sm btn-link text-decoration-none p-0 text-muted" onclick="document.getElementById('raw-log').innerText='Nessun log presente.'">Cancella log</button>
+        </h5>
+        <pre id="raw-log" class="response-log">Effettua un'azione per catturare la risposta del backend...</pre>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+body {
+    background-color: #f1f3f5;
+    font-family: system-ui, sans-serif;
+}
+.nav-tabs .nav-link {
+    color: #495057;
+    font-weight: 500;
+}
+.nav-tabs .nav-link.active {
+    font-weight: bold;
+}
+.response-log {
+    background-color: #212529;
+    color: #0dfd0d;
+    font-family: monospace;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 15px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.hidden {
+    display: none !important;
+}
+.badge-role {
+    font-size: 0.85rem;
+}
+.poll-card:hover {
+    background-color: #f8f9fa;
+}
+.small-note {
+    font-size: 0.85rem;
+}
